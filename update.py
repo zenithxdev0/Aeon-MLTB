@@ -70,7 +70,6 @@ try:
     config_file = {
         key: value.strip() if isinstance(value, str) else value
         for key, value in vars(settings).items()
-        if not key.startswith("__")
     }
 except ModuleNotFoundError:
     log_error(
@@ -87,23 +86,22 @@ if not BOT_TOKEN:
 BOT_ID = BOT_TOKEN.split(":", 1)[0]
 
 # Fallback to environment variables for DATABASE_URL
-DATABASE_URL = (
-    config_file.get("DATABASE_URL", "").strip()
-    or os.getenv("DATABASE_URL", "").strip()
-)
+DATABASE_URL = config_file.get("DATABASE_URL", "") or os.getenv("DATABASE_URL", "")
 
 if DATABASE_URL:
     try:
         conn = MongoClient(DATABASE_URL, server_api=ServerApi("1"))
         db = conn.luna
-        old_config = db.settings.deployConfig.find_one({"_id": BOT_ID}, {"_id": 0})
         config_dict = db.settings.config.find_one({"_id": BOT_ID})
-        if (
-            (old_config is not None and old_config == config_file)
-            or old_config is None
-        ) and config_dict is not None:
-            config_file["UPSTREAM_REPO"] = config_dict["UPSTREAM_REPO"]
-            config_file["UPSTREAM_BRANCH"] = config_dict["UPSTREAM_BRANCH"]
+        if config_dict is not None:
+            config_file["UPSTREAM_REPO"] = config_dict.get(
+                "UPSTREAM_REPO",
+                config_file.get("UPSTREAM_REPO"),
+            )
+            config_file["UPSTREAM_BRANCH"] = config_dict.get(
+                "UPSTREAM_BRANCH",
+                config_file.get("UPSTREAM_BRANCH"),
+            )
         conn.close()
     except Exception as e:
         log_error(f"Database ERROR: {e}")
