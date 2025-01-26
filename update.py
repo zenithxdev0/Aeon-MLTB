@@ -71,7 +71,7 @@ try:
         key: value.strip() if isinstance(value, str) else value
         for key, value in vars(settings).items()
     }
-except ModuleNotFoundError:
+except Exception:
     log_error(
         "The 'config.py' file is missing! Falling back to environment variables.",
     )
@@ -106,12 +106,17 @@ if DATABASE_URL:
     except Exception as e:
         log_error(f"Database ERROR: {e}")
 
-UPSTREAM_REPO = config_file.get(
-    "UPSTREAM_REPO",
-    "https://github.com/AeonOrg/Aeon-MLTB",
+UPSTREAM_REPO = (
+    config_file.get("UPSTREAM_REPO", "")
+    or os.getenv("UPSTREAM_REPO", "")
+    or "https://github.com/AeonOrg/Aeon-MLTB"
 )
 
-UPSTREAM_BRANCH = config_file.get("UPSTREAM_BRANCH", "") or "main"
+UPSTREAM_BRANCH = (
+    config_file.get("UPSTREAM_BRANCH", "")
+    or os.getenv("UPSTREAM_BRANCH", "")
+    or "main"
+)
 
 if UPSTREAM_REPO:
     if path.exists(".git"):
