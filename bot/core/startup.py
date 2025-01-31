@@ -16,6 +16,7 @@ from bot import (
     index_urls,
     qbit_options,
     rss_dict,
+    shorteners_list,
     user_data,
     xnox_client,
 )
@@ -221,6 +222,22 @@ async def load_configurations():
     await create_subprocess_shell(
         f"gunicorn web.wserver:app --bind 0.0.0.0:{PORT} --worker-class gevent",
     )
+
+    if await aiopath.exists("cfg.zip"):
+        if await aiopath.exists("/JDownloader/cfg"):
+            await rmtree("/JDownloader/cfg", ignore_errors=True)
+        await (
+            await create_subprocess_exec("7z", "x", "cfg.zip", "-o/JDownloader")
+        ).wait()
+        await remove("cfg.zip")
+
+    if await aiopath.exists("shorteners.txt"):
+        async with aiopen("shorteners.txt") as f:
+            lines = await f.readlines()
+            for line in lines:
+                temp = line.strip().split()
+                if len(temp) == 2:
+                    shorteners_list.append({"domain": temp[0], "api_key": temp[1]})
 
     if await aiopath.exists("accounts.zip"):
         if await aiopath.exists("accounts"):
