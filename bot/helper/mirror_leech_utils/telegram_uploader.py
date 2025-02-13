@@ -87,20 +87,20 @@ class TelegramUploader:
         self._processed_bytes += chunk_size
 
     async def _user_settings(self):
-        self._media_group = self._listener.user_dict.get("media_group") or (
+        self._media_group = self._listener.user_dict.get("MEDIA_GROUP") or (
             Config.MEDIA_GROUP
-            if "media_group" not in self._listener.user_dict
+            if "MEDIA_GROUP" not in self._listener.user_dict
             else False
         )
-        self._lprefix = self._listener.user_dict.get("lprefix") or (
+        self._lprefix = self._listener.user_dict.get("LEECH_FILENAME_PREFIX") or (
             Config.LEECH_FILENAME_PREFIX
-            if "lprefix" not in self._listener.user_dict
+            if "LEECH_FILENAME_PREFIX" not in self._listener.user_dict
             else ""
         )
         self._user_dump = self._listener.user_dict.get("user_dump")
-        self._lcaption = self._listener.user_dict.get("lcaption") or (
+        self._lcaption = self._listener.user_dict.get("LEECH_FILENAME_CAPTION") or (
             Config.LEECH_FILENAME_CAPTION
-            if "lcaption" not in self._listener.user_dict
+            if "LEECH_FILENAME_CAPTION" not in self._listener.user_dict
             else ""
         )
         if self._thumb != "none" and not await aiopath.exists(self._thumb):
@@ -221,7 +221,7 @@ class TelegramUploader:
 
     async def _send_media_group(self, subkey, key, msgs):
         for index, msg in enumerate(msgs):
-            if self._listener.mixed_leech or not self._user_session:
+            if self._listener.hybrid_leech or not self._user_session:
                 msgs[index] = await self._listener.client.get_messages(
                     chat_id=msg[0],
                     message_ids=msg[1],
@@ -261,11 +261,8 @@ class TelegramUploader:
             for file_ in natsorted(files):
                 self._error = ""
                 self._up_path = f_path = ospath.join(dirpath, file_)
-                if not ospath.exists(self._up_path):
+                if not await aiopath.exists(self._up_path):
                     LOGGER.error(f"{self._up_path} not exists! Continue uploading!")
-                    continue
-                if file_.lower().endswith(tuple(self._listener.extension_filter)):
-                    await remove(self._up_path)
                     continue
                 try:
                     f_size = await aiopath.getsize(self._up_path)
@@ -299,7 +296,7 @@ class TelegramUploader:
                                             msgs,
                                         )
                     if (
-                        self._listener.mixed_leech
+                        self._listener.hybrid_leech
                         and self._listener.user_transmission
                     ):
                         self._user_session = f_size > 2097152000
@@ -355,7 +352,7 @@ class TelegramUploader:
             return
         if self._total_files == 0:
             await self._listener.on_upload_error(
-                "No files to upload. In case you have filled EXTENSION_FILTER, then check if all files have those extensions or not.",
+                "No files to upload. In case you have filled EXCLUDED_EXTENSIONS, then check if all files have those extensions or not.",
             )
             return
         if self._total_files <= self._corrupted:
@@ -370,6 +367,7 @@ class TelegramUploader:
             self._total_files,
             self._corrupted,
         )
+        return
 
     @retry(
         wait=wait_exponential(multiplier=2, min=4, max=8),

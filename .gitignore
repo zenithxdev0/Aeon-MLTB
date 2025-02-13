@@ -13,4 +13,4 @@ list_drives.txt
 shorteners.txt
 cookies.txt
 downloads/*
-bot.session*
+*.session

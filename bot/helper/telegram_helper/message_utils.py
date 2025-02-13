@@ -290,17 +290,6 @@ async def get_tg_link_message(link, user_id=""):
     raise TgLinkException("Private: Please report!")
 
 
-async def check_permission(_, chat, uploader_id, __):
-    member = await chat.get_member(uploader_id)
-    if (
-        not member.privileges.can_manage_chat
-        or not member.privileges.can_delete_messages
-    ):
-        raise ValueError(
-            "You don't have enough privileges in this chat!",
-        )
-
-
 async def update_status_message(sid, force=False):
     if intervals["stopAll"]:
         return

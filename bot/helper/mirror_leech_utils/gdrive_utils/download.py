@@ -64,6 +64,7 @@ class GoogleDriveDownload(GoogleDriveHelper):
             self._updater.cancel()
             if not self.listener.is_cancelled:
                 async_to_sync(self.listener.on_download_complete)
+            return None
 
     def _download_folder(self, folder_id, path, folder_name):
         folder_name = folder_name.replace("/", "")
@@ -88,7 +89,7 @@ class GoogleDriveDownload(GoogleDriveHelper):
             elif not ospath.isfile(
                 f"{path}{filename}",
             ) and not filename.lower().endswith(
-                tuple(self.listener.extension_filter),
+                tuple(self.listener.excluded_extensions),
             ):
                 self._download_file(file_id, path, filename, mime_type)
             if self.listener.is_cancelled:

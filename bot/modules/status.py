@@ -1,9 +1,16 @@
+from asyncio import iscoroutinefunction
 from time import time
 
 from psutil import cpu_percent, disk_usage, virtual_memory
 
-from bot import bot_start_time, intervals, status_dict, task_dict, task_dict_lock
-from bot.core.config_manager import Config
+from bot import (
+    DOWNLOAD_DIR,
+    bot_start_time,
+    intervals,
+    status_dict,
+    task_dict,
+    task_dict_lock,
+)
 from bot.helper.ext_utils.bot_utils import new_task
 from bot.helper.ext_utils.status_utils import (
     get_readable_file_size,
@@ -25,7 +32,7 @@ async def task_status(_, message):
         count = len(task_dict)
     if count == 0:
         currentTime = get_readable_time(time() - bot_start_time)
-        free = get_readable_file_size(disk_usage(Config.DOWNLOAD_DIR).free)
+        free = get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)
         msg = f"No Active Tasks!\nEach user can get status for his tasks by adding me or user_id after cmd: /{BotCommands.StatusCommand} me"
         msg += (
             f"\n<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {free}"
@@ -47,6 +54,24 @@ async def task_status(_, message):
         await delete_message(message)
 
 
+async def get_download_status(download):
+    tool = download.tool
+    if tool in [
+        "telegram",
+        "yt-dlp",
+        "rclone",
+        "gDriveApi",
+    ]:
+        speed = download.speed()
+    else:
+        speed = 0
+    return (
+        await download.status()
+        if iscoroutinefunction(download.status)
+        else download.status()
+    ), speed
+
+
 @new_task
 async def status_pages(_, query):
     data = query.data.split()
@@ -54,14 +79,17 @@ async def status_pages(_, query):
     await query.answer()
     if data[2] in ["nex", "pre"]:
         async with task_dict_lock:
-            if data[2] == "nex":
-                status_dict[key]["page_no"] += status_dict[key]["page_step"]
-            else:
-                status_dict[key]["page_no"] -= status_dict[key]["page_step"]
+            if key in status_dict:
+                if data[2] == "nex":
+                    status_dict[key]["page_no"] += status_dict[key]["page_step"]
+                else:
+                    status_dict[key]["page_no"] -= status_dict[key]["page_step"]
     elif data[2] == "ps":
         async with task_dict_lock:
-            status_dict[key]["page_step"] = int(data[3])
+            if key in status_dict:
+                status_dict[key]["page_step"] = int(data[3])
     elif data[2] == "st":
         async with task_dict_lock:
-            status_dict[key]["status"] = data[3]
+            if key in status_dict:
+                status_dict[key]["status"] = data[3]
         await update_status_message(key, force=True)

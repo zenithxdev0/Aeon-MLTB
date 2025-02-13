@@ -19,17 +19,19 @@ class TgClient:
     @classmethod
     async def start_bot(cls):
         LOGGER.info("Creating client from BOT_TOKEN")
+        cls.ID = Config.BOT_TOKEN.split(":", 1)[0]
         cls.bot = Client(
-            "bot",
+            cls.ID,
             Config.TELEGRAM_API,
             Config.TELEGRAM_HASH,
+            proxy=Config.TG_PROXY,
             bot_token=Config.BOT_TOKEN,
+            workdir="/usr/src/app",
             parse_mode=enums.ParseMode.HTML,
             max_concurrent_transmissions=10,
         )
         await cls.bot.start()
         cls.NAME = cls.bot.me.username
-        cls.ID = Config.BOT_TOKEN.split(":", 1)[0]
 
     @classmethod
     async def start_user(cls):
@@ -40,6 +42,7 @@ class TgClient:
                     "user",
                     Config.TELEGRAM_API,
                     Config.TELEGRAM_HASH,
+                    proxy=Config.TG_PROXY,
                     session_string=Config.USER_SESSION_STRING,
                     parse_mode=enums.ParseMode.HTML,
                     no_updates=True,

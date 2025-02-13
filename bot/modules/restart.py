@@ -10,7 +10,9 @@ from aiofiles.os import remove
 from bot import LOGGER, intervals, scheduler
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
-from bot.helper.ext_utils.bot_utils import new_task, sync_to_async
+from bot.core.jdownloader_booter import jdownloader
+from bot.core.torrent_manager import TorrentManager
+from bot.helper.ext_utils.bot_utils import new_task
 from bot.helper.ext_utils.db_handler import database
 from bot.helper.ext_utils.files_utils import clean_all
 from bot.helper.telegram_helper import button_build
@@ -120,7 +122,19 @@ async def confirm_restart(_, query):
         if st := intervals["status"]:
             for intvl in list(st.values()):
                 intvl.cancel()
-        await sync_to_async(clean_all)
+        await clean_all()
+        await TorrentManager.close_all()
+        if jdownloader.is_connected:
+            await gather(
+                jdownloader.device.downloadcontroller.stop_downloads(),
+                jdownloader.device.linkgrabber.clear_list(),
+                jdownloader.device.downloads.cleanup(
+                    "DELETE_ALL",
+                    "REMOVE_LINKS_AND_DELETE_FILES",
+                    "ALL",
+                ),
+            )
+            await jdownloader.close()
         proc1 = await create_subprocess_exec(
             "pkill",
             "-9",

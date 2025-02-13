@@ -198,9 +198,9 @@ class RcloneTransferHelper:
             and not Config.RCLONE_FLAGS
             and not self._listener.rc_flags
         ):
-            cmd.append("--drive-acknowledge-abuse")
-        elif remote_type != "drive":
-            cmd.extend(("--retries-sleep", "3s"))
+            cmd.extend(
+                ("--drive-acknowledge-abuse", "--tpslimit", "1", "--transfers", "1"),
+            )
 
         await self._start_download(cmd, remote_type)
 
@@ -295,17 +295,9 @@ class RcloneTransferHelper:
 
         if await aiopath.isdir(path):
             mime_type = "Folder"
-            folders, files = await count_files_and_folders(
-                path,
-                self._listener.extension_filter,
-            )
+            folders, files = await count_files_and_folders(path)
             rc_path += f"/{self._listener.name}" if rc_path else self._listener.name
         else:
-            if path.lower().endswith(tuple(self._listener.extension_filter)):
-                await self._listener.on_upload_error(
-                    "This file extension is excluded by extension filter!",
-                )
-                return
             mime_type = await sync_to_async(get_mime_type, path)
             folders = 0
             files = 1
@@ -347,7 +339,16 @@ class RcloneTransferHelper:
             and not self._listener.rc_flags
         ):
             cmd.extend(
-                ("--drive-chunk-size", "128M", "--drive-upload-cutoff", "128M"),
+                (
+                    "--drive-chunk-size",
+                    "128M",
+                    "--drive-upload-cutoff",
+                    "128M",
+                    "--tpslimit",
+                    "1",
+                    "--transfers",
+                    "1",
+                ),
             )
 
         result = await self._start_upload(cmd, remote_type)
@@ -396,6 +397,7 @@ class RcloneTransferHelper:
             mime_type,
             destination,
         )
+        return
 
     async def clone(self, config_path, src_remote, src_path, mime_type, method):
         destination = self._listener.up_dest
@@ -499,7 +501,7 @@ class RcloneTransferHelper:
             source = f"{source.split(':')[0]}:"
             self._rclone_select = True
         else:
-            ext = "*.{" + ",".join(self._listener.extension_filter) + "}"
+            ext = "*.{" + ",".join(self._listener.excluded_extensions) + "}"
         cmd = [
             "xone",
             method,

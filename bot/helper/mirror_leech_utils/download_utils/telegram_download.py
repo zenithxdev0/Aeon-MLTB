@@ -5,6 +5,7 @@ from time import time
 from pyrogram.errors import FloodPremiumWait, FloodWait
 
 from bot import LOGGER, task_dict, task_dict_lock
+from bot.core.aeon_client import TgClient
 from bot.helper.ext_utils.task_manager import (
     check_running_tasks,
     stop_duplicate_check,
@@ -20,7 +21,7 @@ GLOBAL_GID = set()
 class TelegramDownloadHelper:
     def __init__(self, listener):
         self._processed_bytes = 0
-        self._start_time = time()
+        self._start_time = 1
         self._listener = listener
         self._id = ""
         self.session = ""
@@ -91,13 +92,15 @@ class TelegramDownloadHelper:
             await self._on_download_complete()
         elif not self._listener.is_cancelled:
             await self._on_download_error("Internal error occurred")
+        return
 
     async def add_download(self, message, path, session):
         self.session = session
-        message = await self.session.get_messages(
-            chat_id=message.chat.id,
-            message_ids=message.id,
-        )
+        if self.session != TgClient.bot:
+            message = await self.session.get_messages(
+                chat_id=message.chat.id,
+                message_ids=message.id,
+            )
 
         media = (
             message.document
@@ -123,8 +126,7 @@ class TelegramDownloadHelper:
                 else:
                     path = path + self._listener.name
                 self._listener.size = media.file_size
-                gid = token_hex(4)  # media.file_unique_id
-                # test token_hex as gid
+                gid = token_hex(4)
 
                 msg, button = await stop_duplicate_check(self._listener)
                 if msg:
@@ -150,6 +152,7 @@ class TelegramDownloadHelper:
                                 GLOBAL_GID.remove(self._id)
                         return
 
+                self._start_time = time()
                 await self._on_download_start(gid, add_to_queue)
                 await self._download(message, path)
             else:

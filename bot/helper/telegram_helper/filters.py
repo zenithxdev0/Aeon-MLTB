@@ -1,14 +1,13 @@
 from pyrogram.filters import create
 
-from bot import user_data
+from bot import auth_chats, sudo_users, user_data
 from bot.core.config_manager import Config
 
 
 class CustomFilters:
     async def owner_filter(self, _, update):
         user = update.from_user or update.sender_chat
-        uid = user.id
-        return uid == Config.OWNER_ID
+        return user.id == Config.OWNER_ID
 
     owner = create(owner_filter)
 
@@ -33,6 +32,19 @@ class CustomFilters:
                     thread_id is None
                     or thread_id in user_data[chat_id].get("thread_ids", [])
                 )
+            )
+            or uid in sudo_users
+            or uid in auth_chats
+            or (
+                chat_id in auth_chats
+                and (
+                    (
+                        auth_chats[chat_id]
+                        and thread_id
+                        and thread_id in auth_chats[chat_id]
+                    )
+                    or not auth_chats[chat_id]
+                )
             ),
         )
 
@@ -43,7 +55,8 @@ class CustomFilters:
         uid = user.id
         return bool(
             uid == Config.OWNER_ID
-            or (uid in user_data and user_data[uid].get("is_sudo")),
+            or (uid in user_data and user_data[uid].get("is_sudo"))
+            or uid in sudo_users,
         )
 
     sudo = create(sudo_user)

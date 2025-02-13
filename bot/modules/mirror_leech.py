@@ -5,9 +5,8 @@ from re import match as re_match
 
 from aiofiles.os import path as aiopath
 
-from bot import LOGGER, bot_loop, task_dict_lock
+from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock
 from bot.core.aeon_client import TgClient
-from bot.core.config_manager import Config
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
@@ -26,7 +25,7 @@ from bot.helper.ext_utils.links_utils import (
 )
 from bot.helper.listeners.task_listener import TaskListener
 from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
-    add_aria2c_download,
+    add_aria2_download,
 )
 from bot.helper.mirror_leech_utils.download_utils.direct_downloader import (
     add_direct_download,
@@ -102,7 +101,9 @@ class Mirror(TaskListener):
             "-f": False,
             "-fd": False,
             "-fu": False,
-            "-ml": False,
+            "-hl": False,
+            "-bt": False,
+            "-ut": False,
             "-i": 0,
             "-sp": 0,
             "link": "",
@@ -143,12 +144,14 @@ class Mirror(TaskListener):
         self.convert_audio = args["-ca"]
         self.convert_video = args["-cv"]
         self.name_sub = args["-ns"]
-        self.mixed_leech = args["-ml"]
+        self.hybrid_leech = args["-hl"]
         self.thumbnail_layout = args["-tl"]
         self.as_doc = args["-doc"]
         self.as_med = args["-med"]
         self.metadata = args["-md"]
         self.folder_name = f"/{args['-m']}" if len(args["-m"]) > 0 else ""
+        self.bot_trans = args["-bt"]
+        self.user_trans = args["-ut"]
 
         headers = args["-h"]
         is_bulk = args["-b"]
@@ -229,7 +232,7 @@ class Mirror(TaskListener):
 
         await self.get_tag(text)
 
-        path = f"{Config.DOWNLOAD_DIR}{self.mid}{self.folder_name}"
+        path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
 
         if (
             not self.link
@@ -397,7 +400,7 @@ class Mirror(TaskListener):
             if ussr or pssw:
                 auth = f"{ussr}:{pssw}"
                 headers += f" authorization: Basic {b64encode(auth.encode()).decode('ascii')}"
-            create_task(add_aria2c_download(self, path, headers, ratio, seed_time))
+            create_task(add_aria2_download(self, path, headers, ratio, seed_time))
         await delete_links(self.message)
         return None
 

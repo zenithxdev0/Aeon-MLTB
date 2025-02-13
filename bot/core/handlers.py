@@ -53,17 +53,17 @@ def add_handlers():
         "aioexecute": (
             aioexecute,
             BotCommands.AExecCommand,
-            CustomFilters.owner,
+            CustomFilters.sudo,
         ),
         "execute": (
             execute,
             BotCommands.ExecCommand,
-            CustomFilters.owner,
+            CustomFilters.sudo,
         ),
         "clear": (
             clear,
             BotCommands.ClearLocalsCommand,
-            CustomFilters.owner,
+            CustomFilters.sudo,
         ),
         "select": (
             select,
@@ -229,7 +229,7 @@ def add_handlers():
         "^help": arg_usage,
         "^status": status_pages,
         "^botrestart": confirm_restart,
-        "^log": log_callback,
+        "^aeon": aeon_callback,
     }
 
     for regex_filter, handler_func in regex_filters.items():

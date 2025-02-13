@@ -7,7 +7,7 @@ from pyrogram.filters import regex, user
 from pyrogram.handlers import CallbackQueryHandler
 from yt_dlp import YoutubeDL
 
-from bot import LOGGER, bot_loop, task_dict_lock
+from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
@@ -318,12 +318,14 @@ class YtDlp(TaskListener):
             "-f": False,
             "-fd": False,
             "-fu": False,
-            "-ml": False,
+            "-hl": False,
+            "-bt": False,
+            "-ut": False,
             "-i": 0,
             "-sp": 0,
             "link": "",
             "-m": "",
-            "-opt": "",
+            "-opt": {},
             "-n": "",
             "-up": "",
             "-rcf": "",
@@ -353,6 +355,12 @@ class YtDlp(TaskListener):
             self.ffmpeg_cmds = None
             LOGGER.error(e)
 
+        try:
+            opt = eval(args["-opt"]) if args["-opt"] else {}
+        except Exception as e:
+            LOGGER.error(e)
+            opt = {}
+
         self.select = args["-s"]
         self.name = args["-n"]
         self.up_dest = args["-up"]
@@ -369,19 +377,20 @@ class YtDlp(TaskListener):
         self.convert_audio = args["-ca"]
         self.convert_video = args["-cv"]
         self.name_sub = args["-ns"]
-        self.mixed_leech = args["-ml"]
+        self.hybrid_leech = args["-hl"]
         self.thumbnail_layout = args["-tl"]
         self.as_doc = args["-doc"]
         self.as_med = args["-med"]
         self.metadata = args["-md"]
         self.folder_name = f"/{args['-m']}" if len(args["-m"]) > 0 else ""
+        self.bot_trans = args["-bt"]
+        self.user_trans = args["-ut"]
 
         is_bulk = args["-b"]
 
         bulk_start = 0
         bulk_end = 0
         reply_to = None
-        opt = args["-opt"]
 
         if not isinstance(is_bulk, bool):
             dargs = is_bulk.split(":")
@@ -425,11 +434,11 @@ class YtDlp(TaskListener):
         if len(self.bulk) != 0:
             del self.bulk[0]
 
-        path = f"{Config.DOWNLOAD_DIR}{self.mid}{self.folder_name}"
+        path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
 
         await self.get_tag(text)
 
-        opt = opt or self.user_dict.get("yt_opt") or Config.YT_DLP_OPTIONS
+        opt = opt or self.user_dict.get("YT_DLP_OPTIONS") or Config.YT_DLP_OPTIONS
 
         if not self.link and (reply_to := self.message.reply_to_message):
             self.link = reply_to.text.split("\n", 1)[0].strip()
@@ -455,9 +464,7 @@ class YtDlp(TaskListener):
 
         options = {"usenetrc": True, "cookiefile": "cookies.txt"}
         if opt:
-            yt_opts = opt.split("|")
-            for ytopt in yt_opts:
-                key, value = map(str.strip, ytopt.split(":", 1))
+            for key, value in opt.items():
                 if key in ["postprocessors", "download_ranges"]:
                     continue
                 if key == "format" and not self.select:
@@ -465,19 +472,7 @@ class YtDlp(TaskListener):
                         qual = value
                         continue
                     qual = value
-                if value.startswith("^"):
-                    if "." in value or value == "^inf":
-                        value = float(value.split("^")[1])
-                    else:
-                        value = int(value.split("^")[1])
-                elif value.lower() == "true":
-                    value = True
-                elif value.lower() == "false":
-                    value = False
-                elif value.startswith(("{", "[", "(")) and value.endswith(
-                    ("}", "]", ")"),
-                ):
-                    value = eval(value)
+
                 options[key] = value
         options["playlist_items"] = "0"
 
