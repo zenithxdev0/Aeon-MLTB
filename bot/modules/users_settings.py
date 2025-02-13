@@ -75,7 +75,7 @@ async def get_user_settings(from_user, stype="main"):
             f"userset {user_id} menu LEECH_FILENAME_CAPTION",
         )
         if user_dict.get("LEECH_FILENAME_CAPTION", False):
-            lprefix = user_dict["LEECH_FILENAME_CAPTION"]
+            lcap = user_dict["LEECH_FILENAME_CAPTION"]
         elif (
             "LEECH_FILENAME_CAPTION" not in user_dict
             and Config.LEECH_FILENAME_CAPTION

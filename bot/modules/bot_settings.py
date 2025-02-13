@@ -131,6 +131,7 @@ async def edit_variable(_, message, pre_message, key):
             await database.trunc_table("tasks")
     elif key == "TORRENT_TIMEOUT":
         await TorrentManager.change_aria2_option("bt-stop-timeout", value)
+        value = int(value)
     elif key == "LEECH_SPLIT_SIZE":
         value = min(int(value), TgClient.MAX_SPLIT_SIZE)
     elif key == "EXCLUDED_EXTENSIONS":

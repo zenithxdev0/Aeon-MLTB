@@ -128,17 +128,10 @@ class RcloneTransferHelper:
             await self._listener.on_download_complete()
             return None
         if return_code != -9:
-            error = (
-                stderr.decode().strip()
-                or "Use <code>/shell cat rlog.txt</code> to see more information"
-            )
+            error = stderr.decode().strip()
             if not error and remote_type == "drive" and self._use_service_accounts:
                 error = (
                     "Mostly your service accounts don't have access to this drive!"
-                )
-            elif not error:
-                error = (
-                    "Use <code>/shell cat rlog.txt</code> to see more information"
                 )
             LOGGER.error(error)
 
@@ -220,8 +213,6 @@ class RcloneTransferHelper:
             epath,
             "-v",
             "--log-systemd",
-            "--log-file",
-            "rlog.txt",
         ]
         res, err, code = await cmd_exec(cmd)
 
@@ -237,8 +228,6 @@ class RcloneTransferHelper:
                 else f"https://drive.google.com/uc?id={fid}&export=download"
             )
         elif code != -9:
-            if not err:
-                err = "Use <code>/shell cat rlog.txt</code> to see more information"
             LOGGER.error(
                 f"while getting drive link. Path: {destination}. Stderr: {err}",
             )
@@ -257,10 +246,7 @@ class RcloneTransferHelper:
             return False
         if return_code == 0:
             return True
-        error = (
-            stderr.decode().strip()
-            or "Use <code>/shell cat rlog.txt</code> to see more information"
-        )
+        error = stderr.decode().strip()
         LOGGER.error(error)
         if (
             self._sa_number != 0
@@ -373,16 +359,12 @@ class RcloneTransferHelper:
                 destination,
                 "-v",
                 "--log-systemd",
-                "--log-file",
-                "rlog.txt",
             ]
             res, err, code = await cmd_exec(cmd)
 
             if code == 0:
                 link = res
             elif code != -9:
-                if not err:
-                    err = "Use <code>/shell cat rlog.txt</code> to see more information"
                 LOGGER.error(
                     f"while getting link. Path: {destination} | Stderr: {err}",
                 )
@@ -463,8 +445,6 @@ class RcloneTransferHelper:
                 destination,
                 "-v",
                 "--log-systemd",
-                "--log-file",
-                "rlog.txt",
             ]
             res, err, code = await cmd_exec(cmd)
 
@@ -474,18 +454,13 @@ class RcloneTransferHelper:
             if code == 0:
                 return res, destination
             if code != -9:
-                if not err:
-                    err = "Use <code>/shell cat rlog.txt</code> to see more information"
                 LOGGER.error(
                     f"while getting link. Path: {destination} | Stderr: {err}",
                 )
                 return None, destination
             return None
 
-        error = (
-            stderr.decode().strip()
-            or "Use <code>/shell cat rlog.txt</code> to see more information"
-        )
+        error = stderr.decode().strip()
         LOGGER.error(error)
         await self._listener.on_upload_error(error[:4000])
         return None, None
@@ -520,8 +495,6 @@ class RcloneTransferHelper:
             "-M",
             "-v",
             "--log-systemd",
-            "--log-file",
-            "rlog.txt",
         ]
         if self._rclone_select:
             cmd.extend(("--files-from", self._listener.link))

@@ -288,8 +288,6 @@ class RcloneList:
             f"{self.remote}{self.path}",
             "-v",
             "--log-systemd",
-            "--log-file",
-            "rlog.txt",
         ]
         if self.listener.is_cancelled:
             return
@@ -313,8 +311,6 @@ class RcloneList:
                 self.iter_start = 0
                 await self.get_path_buttons()
         else:
-            if not err:
-                err = "Use <code>/shell cat rlog.txt</code> to see more information"
             LOGGER.error(
                 f"While rclone listing. Path: {self.remote}{self.path}. Stderr: {err}",
             )
