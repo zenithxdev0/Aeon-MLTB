@@ -37,5 +37,3 @@ xria \
     --quiet=true \
     --summary-interval=0 \
     --max-upload-limit=1K
-
-# xnox -d --profile="$(pwd)"

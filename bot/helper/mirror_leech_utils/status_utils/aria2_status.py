@@ -112,7 +112,7 @@ class Aria2Status:
     async def cancel_task(self):
         self.listener.is_cancelled = True
         await self.update()
-        await TorrentManager.aria2.forcePause(self._gid)
+        await TorrentManager.aria2_remove(self._download)
         if self._download.get("seeder", "") == "true" and self.seeding:
             LOGGER.info(f"Cancelling Seed: {self.name()}")
             await self.listener.on_upload_error(
@@ -126,4 +126,3 @@ class Aria2Status:
                 LOGGER.info(f"Cancelling Download: {self.name()}")
                 msg = "Stopped by user!"
             await self.listener.on_download_error(msg)
-        await TorrentManager.aria2.forceRemove(self._gid)

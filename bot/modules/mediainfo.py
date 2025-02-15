@@ -40,7 +40,6 @@ def parseinfo(out, file_size):
                 tc += "</pre><br>"
             tc += f"<blockquote>{line.replace('Text', 'Subtitle')}</blockquote><pre>"
         if not skip:
-            # Replace File size line
             if line.startswith("File size"):
                 line = file_size_line
             key, sep, value = line.partition(":")
@@ -83,10 +82,8 @@ async def gen_mediainfo(message, link=None, media=None, msg=None):
                     async with aiopen(des_path, "ab") as f:
                         await f.write(chunk)
 
-        # Get MediaInfo
         stdout, _, _ = await cmd_exec(ssplit(f'mediainfo "{des_path}"'))
 
-        # Parse MediaInfo with updated file size
         tc = f"<h4>{ospath.basename(des_path)}</h4><br><br>"
         if stdout:
             tc += parseinfo(stdout, file_size)

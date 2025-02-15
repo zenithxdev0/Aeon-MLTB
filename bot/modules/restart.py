@@ -112,7 +112,7 @@ async def confirm_restart(_, query):
         intervals["stopAll"] = True
         restart_message = await send_message(reply_to, "Restarting...")
         await delete_message(message)
-        # await TgClient.stop()
+        await TgClient.stop()
         if scheduler.running:
             scheduler.shutdown(wait=False)
         if qb := intervals["qb"]:
@@ -142,18 +142,7 @@ async def confirm_restart(_, query):
             "gunicorn|xria|xnox|xtra|xone|java|7z|split",
         )
         proc2 = await create_subprocess_exec("python3", "update.py")
-        proc3 = await create_subprocess_exec(
-            "uv",
-            "pip",
-            "install",
-            "-r",
-            "requirements.txt",
-            "--system",
-            "--break-system-packages",
-            "--upgrade",
-        )
         await gather(proc1.wait(), proc2.wait())
-        await proc3.wait()
         async with aiopen(".restartmsg", "w") as f:
             await f.write(f"{restart_message.chat.id}\n{restart_message.id}\n")
         osexecl(executable, executable, "-m", "bot")

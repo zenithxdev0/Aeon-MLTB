@@ -169,7 +169,6 @@ async def token_check(user_id, button=None):
 
     user_data.setdefault(user_id, {})
     data = user_data[user_id]
-    # await database.connect()
     data["TIME"] = await database.get_token_expiry(user_id)
     expire = data.get("TIME")
     isExpired = expire is None or (time() - expire) > token_timeout
@@ -194,5 +193,4 @@ async def token_check(user_id, button=None):
 
         return (msg + f"\n<b>It will expire after {time_str}</b>!"), button
 
-    # await database.disconnect()
     return None, button

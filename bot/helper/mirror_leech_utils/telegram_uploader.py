@@ -97,7 +97,7 @@ class TelegramUploader:
             if "LEECH_FILENAME_PREFIX" not in self._listener.user_dict
             else ""
         )
-        self._user_dump = self._listener.user_dict.get("user_dump")
+        self._user_dump = self._listener.user_dict.get("USER_DUMP")
         self._lcaption = self._listener.user_dict.get("LEECH_FILENAME_CAPTION") or (
             Config.LEECH_FILENAME_CAPTION
             if "LEECH_FILENAME_CAPTION" not in self._listener.user_dict
@@ -161,7 +161,7 @@ class TelegramUploader:
             LOGGER.info(self._up_path)
             await rename(self._up_path, new_path)
             self._up_path = new_path
-            LOGGER.info(self._up_path)  # nxt
+            LOGGER.info(self._up_path)
         if not self._lcaption and not self._lprefix:
             cap_mono = f"<code>{file_}</code>"
         if len(file_) > 60:

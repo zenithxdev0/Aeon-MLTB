@@ -25,7 +25,7 @@ from bot import (
 )
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
-from bot.helper.aeon_utils.metadata_editor import (
+from bot.helper.aeon_utils.command_gen import (
     get_embed_thumb_cmd,
     get_metadata_cmd,
     get_watermark_cmd,
@@ -663,7 +663,7 @@ class TaskConfig:
                     "error",
                     "-progress",
                     "pipe:1",
-                    "-threads",  # Should work
+                    "-threads",
                     "4",
                     *ffmpeg_cmd,
                 ]

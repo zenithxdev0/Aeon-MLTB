@@ -375,6 +375,11 @@ class Mirror(TaskListener):
                         await self.remove_from_same_dir()
                         await delete_links(self.message)
                         return await five_minute_del(x)
+                except Exception as e:
+                    x = await send_message(self.message, e)
+                    await self.remove_from_same_dir()
+                    await delete_links(self.message)
+                    return await five_minute_del(x)
 
         if file_ is not None:
             create_task(

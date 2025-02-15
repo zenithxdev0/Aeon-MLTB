@@ -22,7 +22,6 @@ from time import time
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-from tzlocal import get_localzone
 from uvloop import install
 
 getLogger("requests").setLevel(WARNING)
@@ -102,4 +101,4 @@ shorteners_list = []
 
 subprocess.run(["xnox", "-d", f"--profile={os.getcwd()}"], check=False)
 
-scheduler = AsyncIOScheduler(timezone=str(get_localzone()), event_loop=bot_loop)
+scheduler = AsyncIOScheduler(event_loop=bot_loop)
