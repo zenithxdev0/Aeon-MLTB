@@ -1,5 +1,8 @@
 from asyncio import sleep
 
+from aioaria2.exceptions import Aria2rpcException
+from aiohttp.client_exceptions import ClientError
+
 from bot import LOGGER
 from bot.core.torrent_manager import TorrentManager, aria2_name
 
@@ -47,7 +50,7 @@ class DirectListener:
                     options=self._a2c_opt,
                     position=0,
                 )
-            except Exception as e:
+            except (Aria2rpcException, ClientError) as e:
                 self._failed += 1
                 LOGGER.error(f"Unable to download {filename} due to: {e}")
                 continue

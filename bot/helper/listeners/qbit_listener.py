@@ -4,6 +4,7 @@ from time import time
 
 from aiofiles.os import path as aiopath
 from aiofiles.os import remove
+from aioqbt.exc import AQError
 
 from bot import (
     LOGGER,
@@ -187,7 +188,7 @@ async def _qb_listener():
                         qb_torrents[tag]["seeding"] = False
                         await _on_seed_finish(tor_info)
                         await sleep(0.5)
-            except Exception as e:
+            except AQError as e:
                 LOGGER.error(str(e))
         await sleep(3)
 
