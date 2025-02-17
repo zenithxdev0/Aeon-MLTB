@@ -1,4 +1,4 @@
-from asyncio import create_task, gather, sleep
+from asyncio import gather, sleep
 from html import escape
 
 from aiofiles.os import listdir, makedirs, remove
@@ -482,7 +482,7 @@ class TaskListener(TaskConfig):
         await self.remove_from_same_dir()
         msg = f"{self.tag} Download: {escape(str(error))}"
         x = await send_message(self.message, msg, button)
-        await auto_delete_message(x, time=300)  # noqa: RUF006
+        await auto_delete_message(x, time=300)
         if count == 0:
             await self.clean()
         else:
@@ -521,7 +521,7 @@ class TaskListener(TaskConfig):
                 del task_dict[self.mid]
             count = len(task_dict)
         x = await send_message(self.message, f"{self.tag} {escape(str(error))}")
-        await auto_delete_message(x, time=300)  # noqa: RUF006
+        await auto_delete_message(x, time=300)
         if count == 0:
             await self.clean()
         else:

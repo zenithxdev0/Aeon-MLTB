@@ -1,4 +1,4 @@
-from asyncio import sleep, gather
+from asyncio import gather, sleep
 from re import match as re_match
 from time import time
 
