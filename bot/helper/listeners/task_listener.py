@@ -46,8 +46,8 @@ from bot.helper.mirror_leech_utils.status_utils.telegram_status import TelegramS
 from bot.helper.mirror_leech_utils.telegram_uploader import TelegramUploader
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import (
+    auto_delete_message,
     delete_status,
-    five_minute_del,
     send_message,
     update_status_message,
 )
@@ -482,7 +482,7 @@ class TaskListener(TaskConfig):
         await self.remove_from_same_dir()
         msg = f"{self.tag} Download: {escape(str(error))}"
         x = await send_message(self.message, msg, button)
-        create_task(five_minute_del(x))  # noqa: RUF006
+        await auto_delete_message(x, time=300)  # noqa: RUF006
         if count == 0:
             await self.clean()
         else:
@@ -521,7 +521,7 @@ class TaskListener(TaskConfig):
                 del task_dict[self.mid]
             count = len(task_dict)
         x = await send_message(self.message, f"{self.tag} {escape(str(error))}")
-        create_task(five_minute_del(x))  # noqa: RUF006
+        await auto_delete_message(x, time=300)  # noqa: RUF006
         if count == 0:
             await self.clean()
         else:
