@@ -1,6 +1,5 @@
-from asyncio import sleep
+from asyncio import TimeoutError, sleep
 
-from aioaria2.exceptions import Aria2rpcException
 from aiohttp.client_exceptions import ClientError
 
 from bot import LOGGER
@@ -50,7 +49,7 @@ class DirectListener:
                     options=self._a2c_opt,
                     position=0,
                 )
-            except (Aria2rpcException, ClientError) as e:
+            except (TimeoutError, ClientError) as e:
                 self._failed += 1
                 LOGGER.error(f"Unable to download {filename} due to: {e}")
                 continue

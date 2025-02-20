@@ -1,8 +1,7 @@
 import contextlib
-from asyncio import sleep
+from asyncio import TimeoutError, sleep
 from time import time
 
-from aioaria2.exceptions import Aria2rpcException
 from aiofiles.os import path as aiopath
 from aiofiles.os import remove
 from aiohttp.client_exceptions import ClientError
@@ -64,7 +63,7 @@ async def _on_download_complete(api, data):
         gid = data["params"][0]["gid"]
         download = await api.tellStatus(gid)
         options = await api.getOption(gid)
-    except (Aria2rpcException, ClientError) as e:
+    except (TimeoutError, ClientError) as e:
         LOGGER.error(f"onDownloadComplete: {e}")
         return
     if options.get("follow-torrent", "") == "false":
@@ -120,14 +119,14 @@ async def _on_bt_download_complete(api, data):
         if task.listener.seed:
             try:
                 await api.changeOption(gid, {"max-upload-limit": "0"})
-            except (Aria2rpcException, ClientError) as e:
+            except (TimeoutError, ClientError) as e:
                 LOGGER.error(
                     f"{e} You are not able to seed because you added global option seed-time=0 without adding specific seed_time for this torrent GID: {gid}",
                 )
         else:
             try:
                 await api.forcePause(gid)
-            except (Aria2rpcException, ClientError) as e:
+            except (TimeoutError, ClientError) as e:
                 LOGGER.error(f"onBtDownloadComplete: {e} GID: {gid}")
         await task.listener.on_download_complete()
         if intervals["stopAll"]:
@@ -174,7 +173,7 @@ async def _on_download_error(api, data):
     await sleep(1)
     LOGGER.info(f"onDownloadError: {gid}")
     error = "None"
-    with contextlib.suppress(Aria2rpcException, ClientError):
+    with contextlib.suppress(TimeoutError, ClientError):
         download = await api.tellStatus(gid)
         options = await api.getOption(gid)
         error = download.get("errorMessage", "")
