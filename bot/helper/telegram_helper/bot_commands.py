@@ -23,14 +23,14 @@ class BotCommands:
     ListCommand = f"list{i}"
     SearchCommand = f"search{i}"
     HydraSearchCommamd = f"nzbsearch{i}"
-    StatusCommand = f"status{i}"
+    StatusCommand = [f"status{i}", "statusall"]
     UsersCommand = f"users{i}"
     AuthorizeCommand = f"auth{i}"
     UnAuthorizeCommand = f"unauth{i}"
     AddSudoCommand = f"addsudo{i}"
     RmSudoCommand = f"rmsudo{i}"
     PingCommand = f"ping{i}"
-    RestartCommand = f"restart{i}"
+    RestartCommand = [f"restart{i}", "restartall"]
     RestartSessionsCommand = f"restartses{i}"
     StatsCommand = f"stats{i}"
     HelpCommand = f"help{i}"
