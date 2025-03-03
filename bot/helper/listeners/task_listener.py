@@ -395,7 +395,7 @@ class TaskListener(TaskConfig):
                         )
                         if Config.LOG_CHAT_ID:
                             await send_message(
-                                Config.LOG_CHAT_ID,
+                                int(Config.LOG_CHAT_ID),
                                 f"{msg}<blockquote expandable>{fmsg}</blockquote>",
                             )
                         await sleep(1)
@@ -407,7 +407,7 @@ class TaskListener(TaskConfig):
                     )
                     if Config.LOG_CHAT_ID:
                         await send_message(
-                            Config.LOG_CHAT_ID,
+                            int(Config.LOG_CHAT_ID),
                             f"{msg}<blockquote expandable>{fmsg}</blockquote>",
                         )
                 await send_message(self.message, done_msg)
@@ -450,7 +450,7 @@ class TaskListener(TaskConfig):
             msg += f"\n\n<b>cc: </b>{self.tag}"
             await send_message(self.user_id, msg, button)
             if Config.LOG_CHAT_ID:
-                await send_message(Config.LOG_CHAT_ID, msg, button)
+                await send_message(int(Config.LOG_CHAT_ID), msg, button)
             await send_message(self.message, done_msg)
         if self.seed:
             await clean_target(self.up_dir)
