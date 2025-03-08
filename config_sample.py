@@ -38,6 +38,7 @@ LOG_CHAT_ID = 0
 LEECH_FILENAME_CAPTION = ""
 HYDRA_IP = ""
 HYDRA_API_KEY = ""
+INSTADL_API = ""
 
 # GDrive Tools
 GDRIVE_ID = ""

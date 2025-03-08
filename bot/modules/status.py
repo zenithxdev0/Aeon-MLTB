@@ -21,7 +21,6 @@ from bot.helper.ext_utils.status_utils import (
     get_readable_time,
     speed_string_to_bytes,
 )
-from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
@@ -58,7 +57,7 @@ async def task_status(_, message):
     if count == 0:
         currentTime = get_readable_time(time() - bot_start_time)
         free = get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)
-        msg = f"No Active Tasks!\nEach user can get status for his tasks by adding me or user_id after cmd: /{BotCommands.StatusCommand} me"
+        msg = "No Active Tasks!\n"
         msg += (
             f"\n<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {free}"
             f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UPTIME:</b> {currentTime}"

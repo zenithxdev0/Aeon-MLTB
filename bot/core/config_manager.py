@@ -72,6 +72,7 @@ class Config:
     LEECH_FILENAME_CAPTION: str = ""
     HYDRA_IP: str = ""
     HYDRA_API_KEY: str = ""
+    INSTADL_API: str = ""
 
     @classmethod
     def get(cls, key):

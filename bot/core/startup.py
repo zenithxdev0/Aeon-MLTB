@@ -67,31 +67,53 @@ async def load_settings():
     await database.connect()
     if database.db is not None:
         BOT_ID = Config.BOT_TOKEN.split(":", 1)[0]
-        config_file = Config.get_all()
-        old_config = await database.db.settings.deployConfig.find_one(
+        current_deploy_config = Config.get_all()
+        old_deploy_config = await database.db.settings.deployConfig.find_one(
             {"_id": BOT_ID},
             {"_id": 0},
         )
-        if old_config is None:
+
+        if old_deploy_config is None:
             await database.db.settings.deployConfig.replace_one(
                 {"_id": BOT_ID},
-                config_file,
+                current_deploy_config,
                 upsert=True,
             )
-        if old_config and old_config != config_file:
-            LOGGER.info("Replacing existing deploy config in Database")
+        elif old_deploy_config != current_deploy_config:
+            runtime_config = (
+                await database.db.settings.config.find_one(
+                    {"_id": BOT_ID},
+                    {"_id": 0},
+                )
+                or {}
+            )
+
+            new_vars = {
+                k: v
+                for k, v in current_deploy_config.items()
+                if k not in runtime_config
+            }
+            if new_vars:
+                runtime_config.update(new_vars)
+                await database.db.settings.config.replace_one(
+                    {"_id": BOT_ID},
+                    runtime_config,
+                    upsert=True,
+                )
+                LOGGER.info(f"Added new variables: {list(new_vars.keys())}")
+
             await database.db.settings.deployConfig.replace_one(
                 {"_id": BOT_ID},
-                config_file,
+                current_deploy_config,
                 upsert=True,
             )
-        else:
-            config_dict = await database.db.settings.config.find_one(
-                {"_id": BOT_ID},
-                {"_id": 0},
-            )
-            if config_dict:
-                Config.load_dict(config_dict)
+
+        runtime_config = await database.db.settings.config.find_one(
+            {"_id": BOT_ID},
+            {"_id": 0},
+        )
+        if runtime_config:
+            Config.load_dict(runtime_config)
 
         if pf_dict := await database.db.settings.files.find_one(
             {"_id": BOT_ID},
