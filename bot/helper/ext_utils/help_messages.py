@@ -433,6 +433,6 @@ NOTE: Try each command without any argument to see more detalis.
 /{BotCommands.CancelAllCommand} [query]: Cancel all [status] tasks.
 /{BotCommands.ListCommand} [query]: Search in Google Drive(s).
 /{BotCommands.SearchCommand} [query]: Search for torrents with API.
-/{BotCommands.StatusCommand}: Shows a status of all the downloads.
+/{BotCommands.StatusCommand[0]}: Shows a status of all the downloads.
 /{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in.
 """

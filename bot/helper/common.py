@@ -873,7 +873,7 @@ class TaskConfig:
             await move(dl_path, new_path)
             return new_path
 
-        for dirpath, _, files in await to_thread(walk, dl_path):
+        for dirpath, _, files in await sync_to_async(walk, dl_path, topdown=False):
             for file_ in files:
                 f_path = ospath.join(dirpath, file_)
                 new_name = clean_filename(file_)

@@ -73,6 +73,7 @@ class TelegramUploader:
         self._media_group = False
         self._is_private = False
         self._sent_msg = None
+        self.log_msg = None
         self._user_session = self._listener.user_transmission
         self._error = ""
 
@@ -108,11 +109,7 @@ class TelegramUploader:
 
     async def _msg_to_reply(self):
         if self._listener.up_dest:
-            msg = (
-                self._listener.message.link
-                if self._listener.is_super_chat
-                else self._listener.message.text.lstrip("/")
-            )
+            msg = self._listener.message.text.lstrip("/")
             try:
                 if self._user_session:
                     self._sent_msg = await TgClient.user.send_message(
@@ -131,6 +128,7 @@ class TelegramUploader:
                         disable_notification=True,
                     )
                     self._is_private = self._sent_msg.chat.type.name == "PRIVATE"
+                self.log_msg = self._sent_msg
             except Exception as e:
                 await self._listener.on_upload_error(str(e))
                 return False
